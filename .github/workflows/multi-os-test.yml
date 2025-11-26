@@ -1,6 +1,6 @@
 name: Multi-OS System Check
 
-on: 
+on:
   - push
   - workflow_dispatch
 
@@ -9,14 +9,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Collect System Info (Linux/Mac)
+      - name: Collect System Info (Linux/macOS)
         if: runner.os != 'Windows'
         shell: bash
         run: |
@@ -54,9 +53,8 @@ jobs:
           "=== Comando específico ===" | Out-File -Append system-info.txt
           "Ejecutando PowerShell en Windows" | Out-File -Append system-info.txt
 
-      - name: Upload System Info
+      - name: Upload System Info Artifact
         uses: actions/upload-artifact@v4
         with:
           name: system-info-${{ matrix.os }}
           path: system-info.txt
-
