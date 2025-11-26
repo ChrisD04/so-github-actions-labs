@@ -1,1 +1,62 @@
+name: Multi-OS System Check
+
+on: 
+  - push
+  - workflow_dispatch
+
+jobs:
+  system-info:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Collect System Info (Linux/Mac)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          echo "=== Sistema Operativo ===" > system-info.txt
+          uname -a >> system-info.txt
+          echo "" >> system-info.txt
+
+          echo "=== Arquitectura ===" >> system-info.txt
+          uname -m >> system-info.txt
+          echo "" >> system-info.txt
+
+          echo "=== Variables de Entorno ===" >> system-info.txt
+          env >> system-info.txt
+          echo "" >> system-info.txt
+
+          echo "=== Comando específico ===" >> system-info.txt
+          echo "Ejecutando bash en ${{ runner.os }}" >> system-info.txt
+
+      - name: Collect System Info (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          "=== Sistema Operativo ===" | Out-File system-info.txt
+          systeminfo | Out-File -Append system-info.txt
+          "" | Out-File -Append system-info.txt
+
+          "=== Arquitectura ===" | Out-File -Append system-info.txt
+          $Env:PROCESSOR_ARCHITECTURE | Out-File -Append system-info.txt
+          "" | Out-File -Append system-info.txt
+
+          "=== Variables de Entorno ===" | Out-File -Append system-info.txt
+          gci env: | Out-File -Append system-info.txt
+          "" | Out-File -Append system-info.txt
+
+          "=== Comando específico ===" | Out-File -Append system-info.txt
+          "Ejecutando PowerShell en Windows" | Out-File -Append system-info.txt
+
+      - name: Upload System Info
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-info-${{ matrix.os }}
+          path: system-info.txt
 
