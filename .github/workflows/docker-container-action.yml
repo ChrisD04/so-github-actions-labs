@@ -1,0 +1,44 @@
+name: Docker Container Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  docker-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Revisar el código
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Construir imagen Docker
+      - name: Build Docker image
+        run: docker build -t my-simple-app .
+
+      # 3. Ejecutar contenedor en segundo plano
+      - name: Run Docker container
+        run: docker run -d --name my-container my-simple-app
+
+      # 4. Comunicación host -> contenedor
+      - name: Execute command inside container
+        run: docker exec my-container echo "Hola desde el contenedor!"
+
+      # 5. Comunicación contenedor -> host
+      - name: Contenedor crea archivo visible en host
+        run: |
+          docker exec my-container sh -c "echo 'Archivo creado desde contenedor' > /tmp/archivo_contenedor.txt"
+          cat /tmp/archivo_contenedor.txt
+
+      # 6. Monitoreo de recursos
+      - name: Monitor container resources
+        run: docker stats --no-stream my-container
+
+      # 7. Detener y eliminar contenedor al final
+      - name: Stop and remove container
+        run: |
+          docker stop my-container
+          docker rm my-container
