@@ -1,0 +1,75 @@
+name: System Automation Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  automation-job:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    env:
+      GLOBAL_VAR: "Este es un valor global"   # Variable de entorno global
+
+    steps:
+      # 1. Clonar el repositorio
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Configurar secreto como variable de entorno
+      - name: Set secret env
+        run: echo "SECRET_VAR=${{ secrets.MY_SECRET }}" >> $GITHUB_ENV
+
+      # 3. Ejecutar script según sistema operativo
+      - name: Run automation script
+        shell: ${{ matrix.os == 'windows-latest' && 'pwsh' || 'bash' }}
+        run: |
+          set -e  # Manejo de errores en bash
+          echo "Sistema operativo: $RUNNER_OS"
+          echo "Variable global: $GLOBAL_VAR"
+          echo "Secreto: $SECRET_VAR"
+
+          # --- Linux ---
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            # Crear archivo
+            echo "Archivo creado desde workflow Linux" > testfile.txt
+
+            # Cambiar permisos
+            chmod 644 testfile.txt
+            echo "Permisos aplicados a testfile.txt"
+
+            # Ejecutar proceso en segundo plano
+            nohup bash -c "while true; do echo 'Proceso en segundo plano'; sleep 5; done" &
+            echo "Proceso en segundo plano iniciado"
+
+          # --- Windows ---
+          elif [ "$RUNNER_OS" = "Windows" ]; then
+            # Crear archivo
+            "Archivo creado desde workflow Windows" | Out-File testfile.txt
+
+            # Cambiar permisos
+            icacls testfile.txt /grant Everyone:R
+            echo "Permisos aplicados a testfile.txt"
+
+            # Ejecutar proceso en segundo plano
+            Start-Process powershell -ArgumentList "while (\$true) {Write-Output 'Proceso en segundo plano'; Start-Sleep -Seconds 5}" -NoNewWindow
+            echo "Proceso en segundo plano iniciado"
+          fi
+
+          # Manejo de error simulado
+          if [ ! -f testfile.txt ]; then
+            echo "Error: testfile.txt no se creó correctamente"
+            exit 1
+          fi
+
+      # 4. Guardar artifacts para descargar
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: system-automation-artifacts
+          path: testfile.txt
