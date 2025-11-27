@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Deploy to Render/Vercel
+        run: |
+          echo "Simulación de deploy"
+          # Aquí puedes agregar CLI de Render o Vercel real
+
+      - name: Rollback Strategy
+        if: failure()
+        run: echo "Rollback triggered due to failure"
