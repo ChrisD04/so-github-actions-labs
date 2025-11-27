@@ -1,14 +1,10 @@
 {
   "name": "so-github-actions-labs",
   "version": "1.0.0",
-  "lockfileVersion": 3,
-  "requires": true,
-  "packages": {
-    "": {
-      "name": "so-github-actions-labs",
-      "version": "1.0.0",
-      "dependencies": {}
-    }
-  },
-  "dependencies": {}
+  "scripts": {
+    "lint": "echo \"Lint OK\"",
+    "test": "echo \"Tests passed\"",
+    "test:coverage": "mkdir -p coverage && echo \"coverage ok\" > coverage/index.txt",
+    "build": "mkdir -p dist && echo \"build ok\" > dist/index.html"
+  }
 }
