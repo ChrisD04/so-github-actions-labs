@@ -1,5 +1,5 @@
 {
-  "name": "ci-demo",
+  "name": "so-github-actions-labs",
   "version": "1.0.0",
   "scripts": {
     "lint": "echo \"Lint OK\"",
